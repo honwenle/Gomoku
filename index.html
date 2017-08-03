@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>五子棋</title>
+    <style>
+        body{
+            background: #666;
+            text-align: center;
+        }
+        #can{
+            background: #666;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="can" width="800" height="800"></canvas>
+    <script>
+        var can = document.getElementById('can');
+        var cxt = can.getContext('2d');
+        var isBlack = true;
+        cxt.fillStyle = '#842';
+        cxt.fillRect(25, 25, 750, 750);
+        function drawLine() {
+            cxt.beginPath();
+            cxt.strokeStyle = '#000';
+            cxt.lineWidth = 1;
+            for (var i = 0; i <= 750; i+=50) {
+                cxt.moveTo(i+25, 25);
+                cxt.lineTo(i+25, 775);
+                cxt.stroke();
+                cxt.moveTo(25, i+25);
+                cxt.lineTo(775, i+25);
+                cxt.stroke();
+            }
+        }
+        drawLine();
+        can.addEventListener('click', function (e) {
+            drawPoint(e.offsetX-e.offsetX%50+25, e.offsetY-e.offsetY%50+25);
+        }, false);
+        function drawPoint(x, y) {
+            cxt.beginPath();
+            cxt.fillStyle = isBlack ? '#000' : '#fff';
+            isBlack = !isBlack;
+            cxt.arc(x,y,22,0,Math.PI*2);
+            cxt.closePath();
+            cxt.fill();
+        }
+    </script>
+</body>
+</html>
