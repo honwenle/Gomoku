@@ -60,6 +60,9 @@
             isBlack = !isBlack;
         }
         function getXY(x, y) {
+            if (x < 0 || y < 0) {
+                return -1;
+            }
             return (y-y%50)*50 + x-x%50;
         }
         function checkLine(x, y) {
@@ -71,8 +74,6 @@
                     while (player.indexOf(getXY(x + xo[o][0]*r*i*50, y + xo[o][1]*r*i*50)) > -1) {
                         i++;
                         s++;
-                        console.log(s)
-                        console.log(player)
                         if (s >= 4) {
                             console.log((isBlack ? 'black' : 'white') + ' win');
                             isOver = true;
