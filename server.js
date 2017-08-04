@@ -48,6 +48,13 @@ io.on('connection', function(socket){
             fang: fang
         })
     });
+    socket.on('logout', function (name) {
+        if (player.black == name){
+            player.black = null
+        } else if (player.white == name) {
+            player.white = null
+        }
+    });
 });
 function checkLine(x, y) {
     var i = 1, s = 0;

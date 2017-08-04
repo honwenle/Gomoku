@@ -21,6 +21,7 @@
 </head>
 <body>
     <canvas id="can" width="800" height="800"></canvas>
+    <button id="logout">退出</button>
     <div class="comment">
 		<input type="text" id="user" placeholder="昵称">
 		<input type="text" id="message" placeholder="消息内容">
@@ -35,8 +36,14 @@
         socket.on('join', function (data) {
             playername == data.name && alert('你是' + data.fang)
         });
-        var playername = prompt('输入昵称');
+        var playername = localStorage.gomokuname || prompt('输入昵称');
+        localStorage.gomokuname = playername;
         socket.emit('join', playername);
+        logout.onclick = function () {
+            socket.emit('logout',playername);
+            localStorage.gomokuname = '';
+        }
+
         var can = document.getElementById('can');
         var cxt = can.getContext('2d');
         function init() {
@@ -71,13 +78,21 @@
             cxt.arc(x,y,22,0,Math.PI*2);
             cxt.closePath();
             cxt.fill();
+            drawLast(x, y);
+        }
+        function drawLast(x, y) {
+            cxt.beginPath();
+            cxt.fillStyle = '#f00';
+            cxt.arc(x,y,5,0,Math.PI*2);
+            cxt.closePath();
+            cxt.fill();
         }
         socket.on('win', function (isBlackWin) {
             cxt.font = 'bold 50px 微软雅黑';
-            cxt.fillStyle = ['#000', '#fff'][isBlackWin];
+            cxt.fillStyle = ['#fff', '#000'][isBlackWin];
             cxt.strokeStyle = ['#000', '#fff'][isBlackWin];
             cxt.lineWidth = 2;
-            cxt.fillText(['白方', '黑方'][isBlackWin] + '胜', 325, 375);
+            cxt.fillText(['黑方', '白方'][isBlackWin] + '胜', 325, 375);
             cxt.strokeText(['黑方', '白方'][isBlackWin] + '胜', 325, 375);
         });
         init();
