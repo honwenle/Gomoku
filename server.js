@@ -51,8 +51,10 @@ io.on('connection', function(socket){
     socket.on('logout', function (name) {
         if (player.black == name){
             player.black = null
+            reset();
         } else if (player.white == name) {
             player.white = null
+            reset();
         }
     });
 });
