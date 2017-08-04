@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="/socket.io/socket.io.js"></script>
     <title>五子棋</title>
     <style>
         body{
@@ -13,15 +14,29 @@
         #can{
             background: #666;
         }
+        .comment{
+            text-align: left;
+        }
     </style>
 </head>
 <body>
     <canvas id="can" width="800" height="800"></canvas>
+    <div class="comment">
+		<input type="text" id="user" placeholder="昵称">
+		<input type="text" id="message" placeholder="消息内容">
+        <button id="submit">提交</button>
+        <p>评论内容：</p>
+		<ul id="comment_list"></ul>
+    </div>
+    <script>
+        var socket = io.connect('ws://192.168.43.28:3000');
+    </script>
     <script>
         var can = document.getElementById('can');
         var cxt = can.getContext('2d');
         var isBlack = true, isOver = false;
         var black = [], white = [];
+        var ido = null;
         function init() {
             cxt.fillStyle = '#842';
             cxt.fillRect(25, 25, 750, 750);
@@ -36,10 +51,19 @@
                 cxt.lineTo(775, i+25);
                 cxt.stroke();
             }
+            // TODO: 绘制已有
         }
         can.addEventListener('click', function (e) {
+            ido == null && (ido = isBlack);
+            if (ido != isBlack) return false;
             if(isOver) return false;
-            var num = getXY(e.offsetX, e.offsetY);
+            socket.emit('move', {
+                x: e.offsetX-e.offsetX%50+25,
+                y: e.offsetY-e.offsetY%50+25
+            });
+        }, false);
+        socket.on('move', function (xy) {
+            var num = getXY(xy.x, xy.y);
             if (black.indexOf(num) > -1 || white.indexOf(num) > -1) {
                 return false
             }
@@ -48,8 +72,8 @@
             } else {
                 white.push(num)
             }
-            drawPoint(e.offsetX-e.offsetX%50+25, e.offsetY-e.offsetY%50+25);
-        }, false);
+            drawPoint(xy.x, xy.y);
+        });
         function drawPoint(x, y) {
             cxt.beginPath();
             cxt.fillStyle = isBlack ? '#000' : '#fff';
@@ -93,6 +117,24 @@
             cxt.strokeText((isBlack ? '黑方' : '白方') + '胜', 325, 375);
         }
         init();
+    </script>
+    <script>
+        var d = document;
+        var msg_text = d.getElementById('message');
+        var list = d.getElementById('comment_list');
+        var bt = d.getElementById('submit');
+        var user = d.getElementById('user');
+
+        socket.on('submit', function(msg){
+            var li = d.createElement('li');
+            li.innerHTML = new Date().toLocaleString() + ' ' + (user.value || '游客') + '：' + msg;
+            list.appendChild(li);
+        })
+
+        bt.onclick = function(){
+            socket.emit('submit',msg_text.value)
+            msg_text.value = '';
+        }
     </script>
 </body>
 </html>
