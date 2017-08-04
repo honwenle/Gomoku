@@ -32,11 +32,13 @@
         var socket = io.connect('ws://192.168.43.28:3000');
     </script>
     <script>
+        socket.on('join', function (data) {
+            playername == data.name && alert('你是' + data.fang)
+        });
+        var playername = prompt('输入昵称');
+        socket.emit('join', playername);
         var can = document.getElementById('can');
         var cxt = can.getContext('2d');
-        var isBlack = true, isOver = false;
-        var black = [], white = [];
-        var ido = null;
         function init() {
             cxt.fillStyle = '#842';
             cxt.fillRect(25, 25, 750, 750);
@@ -54,68 +56,30 @@
             // TODO: 绘制已有
         }
         can.addEventListener('click', function (e) {
-            ido == null && (ido = isBlack);
-            if (ido != isBlack) return false;
-            if(isOver) return false;
             socket.emit('move', {
+                p: playername,
                 x: e.offsetX-e.offsetX%50+25,
                 y: e.offsetY-e.offsetY%50+25
             });
         }, false);
         socket.on('move', function (xy) {
-            var num = getXY(xy.x, xy.y);
-            if (black.indexOf(num) > -1 || white.indexOf(num) > -1) {
-                return false
-            }
-            if (isBlack) {
-                black.push(num)
-            } else {
-                white.push(num)
-            }
-            drawPoint(xy.x, xy.y);
+            drawPoint(xy.x, xy.y, xy.isBlack);
         });
-        function drawPoint(x, y) {
+        function drawPoint(x, y, isBlack) {
             cxt.beginPath();
             cxt.fillStyle = isBlack ? '#000' : '#fff';
             cxt.arc(x,y,22,0,Math.PI*2);
             cxt.closePath();
             cxt.fill();
-            checkLine(x, y);
-            isBlack = !isBlack;
         }
-        function getXY(x, y) {
-            if (x < 0 || y < 0) {
-                return -1;
-            }
-            return (y-y%50)*50 + x-x%50;
-        }
-        function checkLine(x, y) {
-            var i = 1, s = 0;
-            var player = isBlack ? black : white;
-            var xo = [[1,0], [1,1], [0,1], [1,-1]];
-            for (var o = 0; o < 4; o++) {
-                for (var r = 1,s = 0; r >= -1; r -= 2, i = 1) {
-                    while (player.indexOf(getXY(x + xo[o][0]*r*i*50, y + xo[o][1]*r*i*50)) > -1) {
-                        i++;
-                        s++;
-                        if (s >= 4) {
-                            console.log((isBlack ? 'black' : 'white') + ' win');
-                            isOver = true;
-                            drawWinText();
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        function drawWinText() {
+        socket.on('win', function (isBlackWin) {
             cxt.font = 'bold 50px 微软雅黑';
-            cxt.fillStyle = !isBlack ? '#000' : '#fff';
-            cxt.strokeStyle = isBlack ? '#000' : '#fff';
+            cxt.fillStyle = ['#000', '#fff'][isBlackWin];
+            cxt.strokeStyle = ['#000', '#fff'][isBlackWin];
             cxt.lineWidth = 2;
-            cxt.fillText((isBlack ? '黑方' : '白方') + '胜', 325, 375);
-            cxt.strokeText((isBlack ? '黑方' : '白方') + '胜', 325, 375);
-        }
+            cxt.fillText(['白方', '黑方'][isBlackWin] + '胜', 325, 375);
+            cxt.strokeText(['黑方', '白方'][isBlackWin] + '胜', 325, 375);
+        });
         init();
     </script>
     <script>
