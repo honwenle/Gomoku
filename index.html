@@ -7,12 +7,16 @@
     <script src="/socket.io/socket.io.js"></script>
     <title>五子棋</title>
     <style>
-        body{
+        .wrap{
             background: #666;
-            text-align: center;
+            position: relative;
         }
         #can{
             background: #666;
+        }
+        #mask{
+            position: absolute;
+            left: 0;
         }
         .comment{
             text-align: left;
@@ -20,7 +24,10 @@
     </style>
 </head>
 <body>
-    <canvas id="can" width="800" height="800"></canvas>
+    <div class="wrap">
+        <canvas id="can" width="800" height="800"></canvas>
+        <canvas id="mask" width="800" height="800"></canvas>
+    </div>
     <button id="logout">退出</button>
     <div class="comment">
 		<input type="text" id="user" placeholder="昵称">
@@ -33,19 +40,10 @@
         var socket = io.connect('ws://192.168.43.28:3000');
     </script>
     <script>
-        socket.on('join', function (data) {
-            playername == data.name && alert('你是' + data.fang)
-        });
-        var playername = localStorage.gomokuname || prompt('输入昵称');
-        localStorage.gomokuname = playername;
-        socket.emit('join', playername);
-        logout.onclick = function () {
-            socket.emit('logout',playername);
-            localStorage.gomokuname = '';
-        }
-
         var can = document.getElementById('can');
         var cxt = can.getContext('2d');
+        var mask = document.getElementById('mask');
+        var cxt2 = mask.getContext('2d');
         function init() {
             cxt.fillStyle = '#842';
             cxt.fillRect(25, 25, 750, 750);
@@ -62,7 +60,7 @@
             }
             // TODO: 绘制已有
         }
-        can.addEventListener('click', function (e) {
+        mask.addEventListener('click', function (e) {
             socket.emit('move', {
                 p: playername,
                 x: e.offsetX-e.offsetX%50+25,
@@ -78,14 +76,15 @@
             cxt.arc(x,y,22,0,Math.PI*2);
             cxt.closePath();
             cxt.fill();
-            // drawLast(x, y);
+            cxt2.clearRect(0,0,800,800);
+            drawLast(x, y);
         }
         function drawLast(x, y) {
-            cxt.beginPath();
-            cxt.fillStyle = '#f00';
-            cxt.arc(x,y,5,0,Math.PI*2);
-            cxt.closePath();
-            cxt.fill();
+            cxt2.beginPath();
+            cxt2.fillStyle = '#f00';
+            cxt2.arc(x,y,5,0,Math.PI*2);
+            cxt2.closePath();
+            cxt2.fill();
         }
         socket.on('win', function (isBlackWin) {
             cxt.font = 'bold 50px 微软雅黑';
@@ -96,6 +95,16 @@
             cxt.strokeText(['黑方', '白方'][isBlackWin] + '胜', 325, 375);
         });
         init();
+        socket.on('join', function (data) {
+            playername == data.name && alert('你是' + data.fang)
+        });
+        var playername = localStorage.gomokuname || prompt('输入昵称');
+        localStorage.gomokuname = playername;
+        socket.emit('join', playername);
+        logout.onclick = function () {
+            socket.emit('logout',playername);
+            localStorage.gomokuname = '';
+        }
     </script>
     <script>
         var d = document;
