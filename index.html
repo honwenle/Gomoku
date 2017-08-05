@@ -38,7 +38,7 @@
 		<ul id="comment_list"></ul>
     </div>
     <script>
-        var socket = io.connect('ws://192.168.43.28:3000');
+        var socket = io.connect('ws://'+location.hostname+':3000');
     </script>
     <script>
         var can = document.getElementById('can');
