@@ -45,7 +45,10 @@ io.on('connection', function(socket){
         }
         io.emit('join', {
             name: name,
-            fang: fang
+            fang: fang,
+            black: black,
+            white: white,
+            isBlack: isBlack
         })
     });
     socket.on('logout', function (name) {

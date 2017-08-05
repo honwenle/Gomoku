@@ -28,6 +28,7 @@
         <canvas id="can" width="800" height="800"></canvas>
         <canvas id="mask" width="800" height="800"></canvas>
     </div>
+    <button id="replay">重新开始</button>
     <button id="logout">退出</button>
     <div class="comment">
 		<input type="text" id="user" placeholder="昵称">
@@ -58,7 +59,6 @@
                 cxt.lineTo(775, i+25);
                 cxt.stroke();
             }
-            // TODO: 绘制已有
         }
         mask.addEventListener('click', function (e) {
             socket.emit('move', {
@@ -96,14 +96,29 @@
         });
         init();
         socket.on('join', function (data) {
-            playername == data.name && alert('你是' + data.fang)
+            var arr = data.isBlack ?
+                [data.black,data.white] :
+                [data.white,data.black]
+            for(var o = 0; o < 2; o++){
+                arr[o].forEach(function(i) {
+                    var x = i%2500+25;
+                    var y = ~~(i/2500)*50+25;
+                    drawPoint(x, y, o)
+                });
+            }
+            playername == data.name && alert('你是' + data.fang);
         });
         var playername = localStorage.gomokuname || prompt('输入昵称');
         localStorage.gomokuname = playername;
         socket.emit('join', playername);
+        replay.onclick = function () {
+            socket.emit('logout',playername);
+            location.reload();
+        }
         logout.onclick = function () {
             socket.emit('logout',playername);
             localStorage.gomokuname = '';
+            location.reload();
         }
     </script>
     <script>
