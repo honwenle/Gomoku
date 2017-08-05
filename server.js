@@ -36,12 +36,14 @@ io.on('connection', function(socket){
     });
     socket.on('join', function (name) {
         var fang = '旁观者';
-        if (!player.black || player.black==name) {
-            player.black = name;
-            fang = '黑方'
-        } else if (!player.white || player.white==name) {
-            player.white= name;
-            fang = '白方'
+        if (name != '') {
+            if (!player.black || player.black==name) {
+                player.black = name;
+                fang = '黑方'
+            } else if (!player.white || player.white==name) {
+                player.white= name;
+                fang = '白方'
+            }
         }
         io.emit('join', {
             name: name,
