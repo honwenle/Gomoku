@@ -63,6 +63,8 @@ io.on('connection', function(socket){
         }
     });
 });
+// 检查是否获胜
+// 像这种四条轴线的，不循环也没问题，把中间的算法抽出来写成一个函数，调用四次就好了
 function checkLine(x, y) {
     var i = 1, s = 0;
     var arr = isBlack ? black : white;
